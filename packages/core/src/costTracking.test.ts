@@ -80,6 +80,34 @@ describe("cost tracking", () => {
     expect(summary.line_items[0]?.pricing_source).toBe("catalog_estimate");
   });
 
+  it("estimates Gemini 3.1 Flash Lite scoring costs from OpenRouter catalog pricing", async () => {
+    const lineItem = makeLineItem({
+      stage: "scoring",
+      task: "stage6_quality_relevance_scorer",
+      schema_name: "ChunkScoringResponse",
+      model: "google/gemini-3.1-flash-lite",
+      quality_mode: "balanced",
+      total_cost_usd: null,
+      pricing_source: "unavailable"
+    });
+
+    const summary = await summarizeModelCosts([lineItem], {
+      pricingCatalog: {
+        "google/gemini-3.1-flash-lite": {
+          prompt: 0.00000025,
+          completion: 0.0000015
+        }
+      }
+    });
+
+    expect(summary.total_cost_usd).toBe(0.000055);
+    expect(summary.by_model["google/gemini-3.1-flash-lite"]?.total_cost_usd).toBe(0.000055);
+    expect(summary.by_stage.scoring?.total_cost_usd).toBe(0.000055);
+    expect(summary.pricing_source).toBe("catalog_estimate");
+    expect(summary.line_items[0]?.input_cost_usd).toBe(0.000025);
+    expect(summary.line_items[0]?.output_cost_usd).toBe(0.00003);
+  });
+
   it("keeps unavailable line items visible when pricing is missing", async () => {
     const lineItem = makeLineItem({
       model: "openai/missing-model",

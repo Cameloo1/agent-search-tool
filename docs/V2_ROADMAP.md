@@ -6,7 +6,7 @@
 - Stage-specific model routing:
   - `openai/gpt-5.4-mini` for default, intent, strategy, and scoring in fast mode.
   - `openai/gpt-5.5` for synthesis and adjudication.
-  - Balanced mode uses `~openai/gpt-mini-latest` for intent/strategy, `~google/gemini-flash-latest` for scoring, and `openai/gpt-5.5` for synthesis.
+  - Balanced mode uses `~openai/gpt-mini-latest` for intent/strategy, `google/gemini-3.1-flash-lite` for scoring, and `openai/gpt-5.5` for synthesis.
   - Quality mode escalates strategy and scoring to `openai/gpt-5.5`.
 - Frontend fast/balanced/quality mode control persisted in browser local storage.
 - Document, chunk, claim, and semantic duplicate-level detection.

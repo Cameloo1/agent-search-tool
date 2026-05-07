@@ -46,7 +46,7 @@ Balanced mode selects `DEFAULT_BALANCED_STAGE_MODELS` unless env overrides or re
 | --- | --- | --- |
 | `intent` | `~openai/gpt-mini-latest` | Classifies the user request into `IntentObject`. |
 | `strategy` | `~openai/gpt-mini-latest` | Creates source-aware `SubQuery` objects. |
-| `scoring` | `~google/gemini-flash-latest` | Scores pre-ranked chunks in batches. |
+| `scoring` | `google/gemini-3.1-flash-lite` | Scores pre-ranked chunks in batches. |
 | `synthesis` | `openai/gpt-5.5` | Writes a cited answer from selected chunks with reasoning enabled in balanced mode. |
 | `adjudicator` | `openai/gpt-5.5` | Reviews weak/cautious answers for gaps and citation support. |
 
@@ -250,7 +250,7 @@ Tiny repair-local stages not expanded above were all local and near-zero: repair
 | --- | ---: | --- | --- | --- |
 | `intent` | 1 | `openai/gpt-5.4-mini-20260317` | success | `4312ms`; alias resolved to a dated model. |
 | `strategy` | 2 | `~openai/gpt-mini-latest` | timeout, timeout | `30009ms` + `30015ms`; fallback subqueries used. |
-| `scoring` | 15 | mostly `google/gemini-3-flash-preview-20251217` | 14 successful attempts plus 1 timeout followed by repair success | Biggest cost/token center; one repair path caused the 51.6s round-2 score block. |
+| `scoring` | 15 | now `google/gemini-3.1-flash-lite`; older trace used the previous Gemini Flash preview | 14 successful attempts plus 1 timeout followed by repair success | Biggest cost/token center; one repair path caused the 51.6s round-2 score block. |
 | `synthesis` | 1 | `google/gemini-3.1-pro-preview-20260219` | success | `14421ms`. |
 | `adjudicator` | 2 | `openai/gpt-5.5` | timeout, timeout | `25003ms` + `25013ms`; deterministic cautious review used. |
 

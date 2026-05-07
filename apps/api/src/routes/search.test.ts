@@ -93,7 +93,7 @@ describe("api routes", () => {
     process.env.LLM_MODEL_BALANCED_DEFAULT = "~openai/gpt-mini-latest";
     process.env.LLM_MODEL_BALANCED_INTENT = "~openai/gpt-mini-latest";
     process.env.LLM_MODEL_BALANCED_STRATEGY = "~openai/gpt-mini-latest";
-    process.env.LLM_MODEL_BALANCED_SCORING = "~google/gemini-flash-latest";
+    process.env.LLM_MODEL_BALANCED_SCORING = "google/gemini-3.1-flash-lite";
     process.env.LLM_MODEL_BALANCED_SYNTHESIS = "openai/gpt-5.5";
     process.env.LLM_MODEL_BALANCED_ADJUDICATOR = "openai/gpt-5.5";
     const app = await buildServer();
@@ -108,7 +108,7 @@ describe("api routes", () => {
     expect(json.trace.model_usage.strategy.model).toBe("~openai/gpt-mini-latest");
     expect(json.trace.model_usage.strategy.quality_mode).toBe("balanced");
     expect(json.trace.model_usage.strategy.escalated).toBe(false);
-    expect(json.trace.model_usage.scoring.model).toBe("~google/gemini-flash-latest");
+    expect(json.trace.model_usage.scoring.model).toBe("google/gemini-3.1-flash-lite");
     expect(json.trace.model_usage.synthesis.model).toBe("openai/gpt-5.5");
     const reasoningByStage = new Map(json.trace.structured_llm_calls.map((call: any) => [call.stage, call.reasoning_enabled]));
     expect(reasoningByStage.get("synthesis")).toBe(true);

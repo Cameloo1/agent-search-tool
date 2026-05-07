@@ -53,7 +53,7 @@ describe("model routing", () => {
     expect(router.providerFor("intent").model).toBe("~openai/gpt-mini-latest");
     expect(router.providerFor("strategy").model).toBe("~openai/gpt-mini-latest");
     expect(router.providerFor("strategy").escalated).toBe(false);
-    expect(router.providerFor("scoring").model).toBe("~google/gemini-flash-latest");
+    expect(router.providerFor("scoring").model).toBe("google/gemini-3.1-flash-lite");
     expect(router.providerFor("synthesis").model).toBe("openai/gpt-5.5");
   });
 

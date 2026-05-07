@@ -48,7 +48,7 @@ describe("runPipeline", () => {
     expect(response.trace.model_usage.strategy.model).toBe("~openai/gpt-mini-latest");
     expect(response.trace.model_usage.strategy.quality_mode).toBe("balanced");
     expect(response.trace.model_usage.strategy.escalated).toBe(false);
-    expect(response.trace.model_usage.scoring.model).toBe("~google/gemini-flash-latest");
+    expect(response.trace.model_usage.scoring.model).toBe("google/gemini-3.1-flash-lite");
     expect(response.trace.model_usage.synthesis.model).toBe("openai/gpt-5.5");
     const reasoningByStage = new Map(response.trace.structured_llm_calls.map((call) => [call.stage, call.reasoning_enabled]));
     expect(reasoningByStage.get("intent")).toBe(false);

@@ -32,7 +32,7 @@ Balanced mode has its own optional env prefix and does not change the original f
 - `LLM_MODEL_BALANCED_DEFAULT=~openai/gpt-mini-latest`
 - `LLM_MODEL_BALANCED_INTENT=~openai/gpt-mini-latest`
 - `LLM_MODEL_BALANCED_STRATEGY=~openai/gpt-mini-latest`
-- `LLM_MODEL_BALANCED_SCORING=~google/gemini-flash-latest`
+- `LLM_MODEL_BALANCED_SCORING=google/gemini-3.1-flash-lite`
 - `LLM_MODEL_BALANCED_SYNTHESIS=openai/gpt-5.5`
 - `LLM_MODEL_BALANCED_ADJUDICATOR=openai/gpt-5.5`
 

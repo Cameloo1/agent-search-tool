@@ -126,7 +126,7 @@ export const DEFAULT_BALANCED_STAGE_MODELS: Record<(typeof LLM_STAGE_KEYS)[numbe
   default: "~openai/gpt-mini-latest",
   intent: "~openai/gpt-mini-latest",
   strategy: "~openai/gpt-mini-latest",
-  scoring: "~google/gemini-flash-latest",
+  scoring: "google/gemini-3.1-flash-lite",
   synthesis: "openai/gpt-5.5",
   adjudicator: "openai/gpt-5.5"
 };
