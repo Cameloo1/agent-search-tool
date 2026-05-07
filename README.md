@@ -36,6 +36,22 @@ Query + optional context
   -> Evidence health + repair + reviewed synthesis + trace
 ```
 
+## Scoring Mechanism
+
+Agent Search does not treat model confidence as the score. It uses a layered evidence scorer: deterministic source pre-rank, structured chunk scoring, extraction confidence ceilings, Bayesian-style source reliability, duplicate clustering, budgeted submodular selection, and evidence-health gates before synthesis.
+
+At the center is a transparent scoring path:
+
+```text
+combined_score =
+  relevance_to_query
+  * source_weight
+  * confidence_score
+  * max(0.4, freshness_fitness)
+```
+
+That score is then constrained by extraction quality, source diversity, novelty, required-source coverage, and citation support. See [docs/SCORING_MECHANISM.md](docs/SCORING_MECHANISM.md) for the full math and pipeline details.
+
 ## Drop-In Agent Tool
 
 ```ts

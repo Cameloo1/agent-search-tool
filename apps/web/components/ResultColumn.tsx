@@ -10,6 +10,7 @@ type ResultColumnProps = {
   result: CompareResult;
   title?: string;
   titleAddon?: ReactNode;
+  showBadges?: boolean;
   onFeedbackSubmit?: (
     result: CompareResult,
     rating: RunFeedbackRating,
@@ -36,7 +37,7 @@ export function ResultColumn({ result, titleAddon, onFeedbackSubmit }: ResultCol
   );
 }
 
-export function ResultColumnHeader({ result, title, titleAddon, onFeedbackSubmit }: ResultColumnProps) {
+export function ResultColumnHeader({ result, title, titleAddon, showBadges = true, onFeedbackSubmit }: ResultColumnProps) {
   const evaluation = result.evaluation;
   const requestId = result.pipeline?.trace?.request_id;
   const canReview = Boolean(requestId && onFeedbackSubmit);
@@ -53,10 +54,12 @@ export function ResultColumnHeader({ result, title, titleAddon, onFeedbackSubmit
         <p className="question-id">Question: {result.question_id || "ad-hoc"}</p>
       </div>
       <div className="column-header-actions">
-        <div className="column-badges">
-          <ScoreBadge status={evaluation?.score_status} evidenceChecked={Boolean(evidenceHealth && !hasGoldMetrics)} />
-          <span className="mode-label">{result.mode}</span>
-        </div>
+        {showBadges ? (
+          <div className="column-badges">
+            <ScoreBadge status={evaluation?.score_status} evidenceChecked={Boolean(evidenceHealth && !hasGoldMetrics)} />
+            <span className="mode-label">{result.mode}</span>
+          </div>
+        ) : null}
         {canReview && onFeedbackSubmit ? (
           <RunFeedbackControl
             feedback={result.feedback}
@@ -149,32 +152,34 @@ function ResultMetricsSection({ result }: { result: CompareResult }) {
   return (
     <section className="column-section">
       <div className="section-title">Metrics</div>
-      <div className="metrics-grid">
-        <Metric label="Token count" value={formatNumber(result.token_count)} tone={result.token_count > 0 ? "neutral" : "muted"} />
-        <Metric label="Time" value={formatTime(result.time_to_result_ms)} tone={result.time_to_result_ms > 0 ? "neutral" : "muted"} />
-        {showEvidenceMetrics ? (
-          <>
-            <Metric
-              label="Evidence coverage"
-              value={formatEvidenceScore(evidenceHealth?.evidence_coverage_score, evidenceHealth?.status)}
-              title={evidenceTooltip(evidenceHealth)}
-              tone={evidenceTone}
-            />
-            <Metric
-              label="Evidence quality"
-              value={formatEvidenceScore(evidenceHealth?.evidence_quality_score, evidenceHealth?.status)}
-              title={evidenceTooltip(evidenceHealth)}
-              tone={evidenceTone}
-            />
-          </>
-        ) : (
-          <>
-            <Metric label="Facts hit" value={factsValue} tone={factsTone} />
-            <Metric label="Source quality" value={sourceQuality} tone={sourceQualityTone} />
-          </>
-        )}
+      <div className={evidenceHealth ? "metrics-overview" : undefined}>
+        <div className="metrics-grid">
+          <Metric label="Token count" value={formatNumber(result.token_count)} tone={result.token_count > 0 ? "neutral" : "muted"} />
+          <Metric label="Time" value={formatTime(result.time_to_result_ms)} tone={result.time_to_result_ms > 0 ? "neutral" : "muted"} />
+          {showEvidenceMetrics ? (
+            <>
+              <Metric
+                label="Evidence coverage"
+                value={formatEvidenceScore(evidenceHealth?.evidence_coverage_score, evidenceHealth?.status)}
+                title={evidenceTooltip(evidenceHealth)}
+                tone={evidenceTone}
+              />
+              <Metric
+                label="Evidence quality"
+                value={formatEvidenceScore(evidenceHealth?.evidence_quality_score, evidenceHealth?.status)}
+                title={evidenceTooltip(evidenceHealth)}
+                tone={evidenceTone}
+              />
+            </>
+          ) : (
+            <>
+              <Metric label="Facts hit" value={factsValue} tone={factsTone} />
+              <Metric label="Source quality" value={sourceQuality} tone={sourceQualityTone} />
+            </>
+          )}
+        </div>
+        {evidenceHealth ? <EvidenceHealthSummary health={evidenceHealth} /> : null}
       </div>
-      {evidenceHealth ? <EvidenceHealthSummary health={evidenceHealth} /> : null}
     </section>
   );
 }

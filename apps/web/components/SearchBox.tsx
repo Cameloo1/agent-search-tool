@@ -134,7 +134,7 @@ export function SearchBox({
           ) : null}
         </div>
 
-        <div className="field">
+        <div className="field budget-field">
           <label htmlFor="token-budget">Budget</label>
           <input
             id="token-budget"
@@ -146,6 +146,9 @@ export function SearchBox({
             value={tokenBudget}
             onChange={(event) => setTokenBudget(Number(event.target.value))}
           />
+          <span className="budget-tooltip" role="tooltip">
+            Maximum token budget for evidence selection and synthesis.
+          </span>
         </div>
 
         <div className="field mode-field">

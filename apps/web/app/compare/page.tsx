@@ -460,7 +460,11 @@ export default function ComparePage() {
           <ComparePaneTabs selected={comparePaneView} onSelect={setComparePaneView} />
           {comparePaneView === "run_metrics" ? (
             <article className="result-column">
-              <ResultColumnHeader result={agentResult} title="Last Run Metrics" onFeedbackSubmit={handleFeedbackSubmit} />
+              <ResultColumnHeader
+                result={agentResult}
+                title="Last Run Metrics"
+                showBadges={false}
+              />
               <ResultDiagnosticsSections result={agentResult} />
             </article>
           ) : (
