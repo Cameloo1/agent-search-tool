@@ -1,0 +1,18 @@
+{
+  "version": "example",
+  "methodology": "Example only. Real scoring requires the locked gold artifact.",
+  "questions": [
+    { "id": "Q1", "category": "Example", "query_types": ["multi-hop"], "question": "Example Q1?" },
+    { "id": "Q2", "category": "Example", "query_types": ["source-attribution"], "question": "Example Q2?" },
+    { "id": "Q3", "category": "Example", "query_types": ["dedup-prone"], "question": "Example Q3?" },
+    { "id": "Q4", "category": "Example", "query_types": ["adversarial"], "question": "Example Q4?" },
+    { "id": "Q5", "category": "Example", "query_types": ["academic"], "question": "Example Q5?" }
+  ],
+  "answers": [
+    { "question_id": "Q1", "gold_answer": "Example.", "must_hit_atomic_facts": [{ "id": "Q1-F1", "text": "Example fact.", "keywords": ["example"], "weight": 1 }], "required_source_types": [{ "id": "Q1-S1", "type": "academic", "description": "Example source.", "weight": 1 }], "penalize_if": [], "methodology_notes": "" },
+    { "question_id": "Q2", "gold_answer": "Example.", "must_hit_atomic_facts": [{ "id": "Q2-F1", "text": "Example fact.", "keywords": ["example"], "weight": 1 }], "required_source_types": [{ "id": "Q2-S1", "type": "academic", "description": "Example source.", "weight": 1 }], "penalize_if": [], "methodology_notes": "" },
+    { "question_id": "Q3", "gold_answer": "Example.", "must_hit_atomic_facts": [{ "id": "Q3-F1", "text": "Example fact.", "keywords": ["example"], "weight": 1 }], "required_source_types": [{ "id": "Q3-S1", "type": "academic", "description": "Example source.", "weight": 1 }], "penalize_if": [], "methodology_notes": "" },
+    { "question_id": "Q4", "gold_answer": "Example.", "must_hit_atomic_facts": [{ "id": "Q4-F1", "text": "Example fact.", "keywords": ["example"], "weight": 1 }], "required_source_types": [{ "id": "Q4-S1", "type": "academic", "description": "Example source.", "weight": 1 }], "penalize_if": [], "methodology_notes": "" },
+    { "question_id": "Q5", "gold_answer": "Example.", "must_hit_atomic_facts": [{ "id": "Q5-F1", "text": "Example fact.", "keywords": ["example"], "weight": 1 }], "required_source_types": [{ "id": "Q5-S1", "type": "academic", "description": "Example source.", "weight": 1 }], "penalize_if": [], "methodology_notes": "" }
+  ]
+}

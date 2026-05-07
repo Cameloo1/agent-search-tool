@@ -1,0 +1,201 @@
+{
+  "version": "2026-04-29-user-provided-gold-v1",
+  "methodology": "Gold answers are benchmark targets built from primary-source grounding, a human edit pass, and claim-level scoring. Q1, Q2, and Q5 are treated as multi-model, primary-source-grounded baselines; Q3 and Q4 are domain-expert framed and source-verified. Competing engines are scored against atomic facts and source coverage, not prose style.",
+  "questions": [
+    {
+      "id": "Q1",
+      "category": "Debt, spending, inflation, fiscal capacity, AI productivity, and AI infrastructure strain",
+      "query_types": ["multi-hop", "adversarial", "fresh-fact"],
+      "question": "What’s gonna happen if we keep spending more and more money on debt? How can we approach fixing this, and how is AI poised to help exactly? What is it currently doing that’s pushing us towards this?"
+    },
+    {
+      "id": "Q2",
+      "category": "LLMs for AppSec and pre-production testing",
+      "query_types": ["source-attribution", "adversarial"],
+      "question": "How to use [LLM like GPT-5.5] for appsec and pre-production testing the correct way? Why exactly are most vibecode projects unsecure and unoptimized? What can I do to close this gap?"
+    },
+    {
+      "id": "Q3",
+      "category": "Market downturns, retail vs institutional behavior, geopolitics, debt, inflation, confidence",
+      "query_types": ["multi-hop", "dedup-prone", "source-attribution"],
+      "question": "I want to learn more about retail and institution activity during market downturns, and how each one influenced geopolitical events and markets after, years to come. All notable market downturns, categorize by 1900s and 2000s to present. What are the most impactful events, and how are they still affecting debt, inflation, and economy sentiment / confidence to this present day?"
+    },
+    {
+      "id": "Q4",
+      "category": "Institutional news speed, market intelligence infrastructure, banks/traders, data feeds, macro releases, filings, squawk, co-location, legality",
+      "query_types": ["source-attribution", "adversarial"],
+      "question": "To match and beat top traders, I want to learn about how institutions and banks get news updates fast and quick to gain a competitive edge over other traders in markets? I’d like to know about their strategies and infrastructure so that I can research more about this."
+    },
+    {
+      "id": "Q5",
+      "category": "Domain-specific duplicate detection, information-theoretic and learned similarity, submodular token-budgeted assembly, Bayesian source reliability",
+      "query_types": ["multi-hop", "source-attribution"],
+      "question": "How can I build an advanced data pipeline that first identifies domain-specific duplicates using information-theoretic and learned similarity measures, then optimizes the assembly of those deduplicated chunks by treating information coverage as a submodular optimization problem within a token budget, and finally incorporates a dynamic Bayesian reliability layer to weight those sources based on their historical agreement or disagreement with the consensus?"
+    }
+  ],
+  "answers": [
+    {
+      "question_id": "Q1",
+      "gold_answer": "If the U.S. continues running large deficits while interest costs keep rising, the main risk is slow loss of fiscal flexibility rather than instant collapse. More revenue is consumed by interest, the government has less room for recessions or wars, and investors may demand higher yields. Debt does not mechanically create inflation; inflation risk depends on real capacity, monetary policy, confidence, and whether demand exceeds productive capacity. Fixing the path requires spending discipline, tax reform, entitlement and healthcare-cost reform, productivity growth, and better government execution. AI can help by raising real productivity, improving software/scientific work, reducing administrative drag, detecting fraud and waste, improving tax compliance, accelerating medical and energy research, and making public services cheaper. AI is also creating near-term strain through data-center electricity, chips, land, cooling, capital equipment, and grid infrastructure demand. A complete answer rejects both doom framing and techno-utopian framing.",
+      "must_hit_atomic_facts": [
+        { "id": "Q1-F1", "text": "Rising debt mainly creates a compounding interest-cost problem.", "keywords": ["interest cost", "compounding", "debt"], "weight": 1 },
+        { "id": "Q1-F2", "text": "CBO projects long-term deficits and net interest costs rising significantly.", "keywords": ["CBO", "deficits", "net interest"], "weight": 1 },
+        { "id": "Q1-F3", "text": "Debt does not mechanically equal inflation.", "keywords": ["does not mechanically", "inflation", "debt"], "weight": 1 },
+        { "id": "Q1-F4", "text": "Inflation risk depends on real capacity, monetary policy, confidence, and demand.", "keywords": ["capacity", "monetary policy", "confidence"], "weight": 1 },
+        { "id": "Q1-F5", "text": "Real fixes require both revenue and spending-side changes.", "keywords": ["revenue", "spending", "tax"], "weight": 1 },
+        { "id": "Q1-F6", "text": "Healthcare, entitlements, tax structure, and productivity must be mentioned.", "keywords": ["healthcare", "entitlements", "productivity"], "weight": 1 },
+        { "id": "Q1-F7", "text": "AI can help through productivity, automation, fraud detection, research acceleration, and better public-sector execution.", "keywords": ["AI", "productivity", "fraud", "research"], "weight": 1 },
+        { "id": "Q1-F8", "text": "AI is also increasing data-center, energy, chip, grid, cooling, and infrastructure demand.", "keywords": ["data-center", "energy", "grid", "cooling"], "weight": 1 },
+        { "id": "Q1-F9", "text": "A strong answer rejects both doom framing and techno-utopian framing.", "keywords": ["not automatically fatal", "not magically", "conditional"], "weight": 1 }
+      ],
+      "required_source_types": [
+        { "id": "Q1-S1", "type": "government", "description": "CBO long-term budget projections or equivalent official budget data", "weight": 1 },
+        { "id": "Q1-S2", "type": "primary-document", "description": "Treasury or FRED interest-cost data", "weight": 1 },
+        { "id": "Q1-S3", "type": "government", "description": "IEA or equivalent energy/data-center demand report", "weight": 1 },
+        { "id": "Q1-S4", "type": "academic", "description": "Federal Reserve or mainstream macroeconomic source for inflation/debt mechanics", "weight": 1 }
+      ],
+      "penalize_if": [
+        "Says debt automatically causes hyperinflation.",
+        "Says AI will solve the debt.",
+        "Ignores interest costs.",
+        "Ignores entitlement or healthcare spending.",
+        "Ignores AI energy and infrastructure demand.",
+        "Gives political talking points instead of fiscal mechanics."
+      ],
+      "methodology_notes": "Q1 is a multi-hop, adversarial, fresh-fact benchmark requiring primary-source grounding and balanced causal mechanics."
+    },
+    {
+      "question_id": "Q2",
+      "gold_answer": "The correct way to use an LLM for AppSec is to treat it as a security-review accelerator, not the authority deciding whether the application is safe. It should map architecture, assets, trust boundaries, data flows, endpoints, authentication, authorization, third-party services, secrets, deployment configuration, and webhook/payment flows, then generate attack hypotheses, tests, abuse cases, and remediation tickets. Evidence still comes from code review, scanners, manual tests, logs, and reproducible exploit paths. Vibecode projects are insecure because they optimize visible happy-path functionality over invisible guarantees such as server-side authorization, input validation, rate limiting, secure sessions, secrets management, dependency review, logging, monitoring, backup/restore, and production hardening. A release gate should require no hardcoded secrets, server-side protection on sensitive routes, object-level authorization tests, external input schema validation, webhook signature verification, least-privilege keys, safe error handling, dependency review, security headers, sensitive-event logging, rollback, performance budget, and a written threat model.",
+      "must_hit_atomic_facts": [
+        { "id": "Q2-F1", "text": "LLM should assist AppSec, not replace AppSec judgment.", "keywords": ["assist", "not replace", "AppSec"], "weight": 1 },
+        { "id": "Q2-F2", "text": "Start with architecture, data flows, trust boundaries, auth, APIs, and deployment context.", "keywords": ["architecture", "trust boundaries", "deployment"], "weight": 1 },
+        { "id": "Q2-F3", "text": "Vibecode projects fail because they optimize for visible functionality, not security invariants.", "keywords": ["visible functionality", "security invariants", "happy-path"], "weight": 1 },
+        { "id": "Q2-F4", "text": "Must mention OWASP-style risks: access control, injection, misconfiguration, vulnerable dependencies, SSRF, auth/session failures.", "keywords": ["access control", "injection", "SSRF", "dependencies"], "weight": 1 },
+        { "id": "Q2-F5", "text": "Must mention automated and manual testing.", "keywords": ["automated", "manual testing", "scanners"], "weight": 1 },
+        { "id": "Q2-F6", "text": "Must mention server-side authorization, not only frontend checks.", "keywords": ["server-side authorization", "object-level"], "weight": 1 },
+        { "id": "Q2-F7", "text": "Must mention secrets management and webhook verification.", "keywords": ["secrets", "webhook signature"], "weight": 1 },
+        { "id": "Q2-F8", "text": "Must mention pre-production release gates.", "keywords": ["release gate", "pre-production"], "weight": 1 },
+        { "id": "Q2-F9", "text": "Must include performance/optimization, not only security.", "keywords": ["performance", "optimization", "load"], "weight": 1 },
+        { "id": "Q2-F10", "text": "Must emphasize reproducible evidence over vibes.", "keywords": ["reproducible", "evidence"], "weight": 1 }
+      ],
+      "required_source_types": [
+        { "id": "Q2-S1", "type": "primary-document", "description": "OWASP Top 10 or ASVS", "weight": 1 },
+        { "id": "Q2-S2", "type": "primary-document", "description": "NIST SSDF", "weight": 1 },
+        { "id": "Q2-S3", "type": "government", "description": "CISA secure-by-design guidance", "weight": 1 },
+        { "id": "Q2-S4", "type": "code", "description": "Tool docs for SAST/SCA/DAST/secrets/IaC scanners when naming tools", "weight": 1 }
+      ],
+      "penalize_if": [
+        "Treats an LLM scan as enough.",
+        "Only talks about prompts and not actual tests.",
+        "Ignores authorization.",
+        "Ignores secrets and environment configuration.",
+        "Ignores webhooks, payments, cron jobs, storage, or deployment.",
+        "Gives generic use HTTPS and sanitize inputs advice only."
+      ],
+      "methodology_notes": "Q2 is a source-attribution and adversarial benchmark; real tests and release gates matter more than prompt recipes."
+    },
+    {
+      "question_id": "Q3",
+      "gold_answer": "A strong answer should explain downturns as feedback loops between leverage, liquidity, policy response, public confidence, and institutional balance sheets, not merely list crashes. Retail activity usually appears through late-cycle speculation, forced selling, panic liquidation, bank runs, retirement-account drawdowns, and later distrust or re-entry. Institutional activity appears through leverage, margin calls, bank lending contraction, forced deleveraging, portfolio insurance, collateral stress, credit freezes, central-bank response, and later changes in regulation and market structure. For the 1900s, the most important events include the Panic of 1907, the 1929 crash and Great Depression, the 1973-74 bear market/oil shock, and the 1987 crash. For the 2000s onward, key events include the dot-com bust, the 2008 global financial crisis, the 2020 COVID crash, and the 2022 inflation/rate shock. The present-day effects include higher debt levels, higher interest costs, lower trust in institutions, more sensitivity to inflation data, greater dependence on central-bank communication, and a market culture trained to expect intervention during crises.",
+      "must_hit_atomic_facts": [
+        { "id": "Q3-F1", "text": "Crashes should be explained as liquidity/leverage/confidence/policy feedback loops.", "keywords": ["liquidity", "leverage", "confidence", "policy"], "weight": 1 },
+        { "id": "Q3-F2", "text": "Must categorize 1900s vs 2000s-present.", "keywords": ["1900s", "2000s", "present"], "weight": 1 },
+        { "id": "Q3-F3", "text": "Must include 1929/Great Depression.", "keywords": ["1929", "Great Depression"], "weight": 1 },
+        { "id": "Q3-F4", "text": "Must include 1970s oil shock/stagflation.", "keywords": ["1970s", "oil shock", "stagflation"], "weight": 1 },
+        { "id": "Q3-F5", "text": "Must include 1987 market-structure crash.", "keywords": ["1987", "portfolio insurance", "market structure"], "weight": 1 },
+        { "id": "Q3-F6", "text": "Must include dot-com bust.", "keywords": ["dot-com"], "weight": 1 },
+        { "id": "Q3-F7", "text": "Must include 2008 global financial crisis.", "keywords": ["2008", "global financial crisis", "Great Recession"], "weight": 1 },
+        { "id": "Q3-F8", "text": "Must include COVID crash and policy response.", "keywords": ["COVID", "policy response", "fiscal"], "weight": 1 },
+        { "id": "Q3-F9", "text": "Must include 2022 inflation/rate shock.", "keywords": ["2022", "rate shock", "inflation"], "weight": 1 },
+        { "id": "Q3-F10", "text": "Must distinguish retail behavior from institutional behavior.", "keywords": ["retail", "institutional", "forced selling"], "weight": 1 },
+        { "id": "Q3-F11", "text": "Must connect downturns to debt, inflation, policy credibility, and confidence today.", "keywords": ["debt", "inflation", "confidence", "policy credibility"], "weight": 1 }
+      ],
+      "required_source_types": [
+        { "id": "Q3-S1", "type": "government", "description": "Federal Reserve History for Great Depression and Great Recession", "weight": 1 },
+        { "id": "Q3-S2", "type": "government", "description": "BLS/FRED for unemployment, inflation, employment, GDP", "weight": 1 },
+        { "id": "Q3-S3", "type": "government", "description": "CBO/Treasury for debt and interest costs", "weight": 1 },
+        { "id": "Q3-S4", "type": "academic", "description": "Academic or central-bank sources for market-structure and crisis mechanisms", "weight": 1 },
+        { "id": "Q3-S5", "type": "primary-document", "description": "SEC or market-structure sources for portfolio insurance, circuit breakers, or liquidity", "weight": 1 }
+      ],
+      "penalize_if": [
+        "Just lists crashes with dates.",
+        "Overstates retail influence.",
+        "Ignores leverage and credit.",
+        "Ignores central-bank and fiscal response.",
+        "Treats geopolitics as a vague add-on.",
+        "Fails to connect past crises to current debt, inflation, and confidence.",
+        "Gives Wikipedia-tier summaries with no mechanism."
+      ],
+      "methodology_notes": "Q3 is a domain-depth gate. Retail is usually a symptom or amplifier; institutions, credit systems, leverage, policy, and liquidity structures are the main transmission mechanisms."
+    },
+    {
+      "question_id": "Q4",
+      "gold_answer": "Institutions do not usually win because they have one secret news source. They win because they build a full information stack: paid terminals, direct market data feeds, economic calendars, squawk services, analyst networks, filings feeds, broker research, alternative data, NLP systems, low-latency infrastructure, execution systems, and risk controls. Scheduled macro data such as CPI, FOMC, NFP, GDP, EIA, and Treasury auctions are known in advance, so the edge is preparation, consensus mapping, fast parsing, and execution discipline. Unscheduled headlines require feed quality, entity recognition, relevance filtering, and knowing which instruments react. Filings and disclosures are public through SEC EDGAR but automated access must respect fair-access limits. Professional workflow is ingest, normalize, classify, map to assets, compare against expectations, estimate impact, route alert, and execute only if risk rules allow. Retail cannot match co-location or premium budgets, but can emulate structure with calendars, reliable feeds, EDGAR alerts, watchlists, classification, and journaling. Material nonpublic information is not a legitimate edge.",
+      "must_hit_atomic_facts": [
+        { "id": "Q4-F1", "text": "Institutions use information stacks, not one magic feed.", "keywords": ["information stack", "not one", "feed"], "weight": 1 },
+        { "id": "Q4-F2", "text": "Must mention Bloomberg/LSEG/Reuters/Dow Jones/FactSet/S&P/broker research or equivalent.", "keywords": ["Bloomberg", "Reuters", "FactSet", "broker research"], "weight": 1 },
+        { "id": "Q4-F3", "text": "Must mention squawk/news services.", "keywords": ["squawk"], "weight": 1 },
+        { "id": "Q4-F4", "text": "Must mention direct exchange feeds and co-location for low-latency players.", "keywords": ["direct feeds", "co-location", "low-latency"], "weight": 1 },
+        { "id": "Q4-F5", "text": "Must mention scheduled macro releases.", "keywords": ["CPI", "FOMC", "NFP", "macro"], "weight": 1 },
+        { "id": "Q4-F6", "text": "Must mention SEC filings and EDGAR.", "keywords": ["SEC", "EDGAR", "filings"], "weight": 1 },
+        { "id": "Q4-F7", "text": "Must mention NLP/classification/entity mapping.", "keywords": ["NLP", "classification", "entity"], "weight": 1 },
+        { "id": "Q4-F8", "text": "Must mention expectations vs surprise.", "keywords": ["expectations", "surprise"], "weight": 1 },
+        { "id": "Q4-F9", "text": "Must mention risk controls and trade filtering.", "keywords": ["risk controls", "filtering"], "weight": 1 },
+        { "id": "Q4-F10", "text": "Must clearly state legal boundaries around material nonpublic information.", "keywords": ["material nonpublic", "legal", "compliance"], "weight": 1 },
+        { "id": "Q4-F11", "text": "Must explain what retail can realistically emulate.", "keywords": ["retail", "emulate", "calendar"], "weight": 1 }
+      ],
+      "required_source_types": [
+        { "id": "Q4-S1", "type": "primary-document", "description": "SEC market-structure sources on direct feeds and co-location", "weight": 1 },
+        { "id": "Q4-S2", "type": "primary-document", "description": "SEC EDGAR access guidance", "weight": 1 },
+        { "id": "Q4-S3", "type": "government", "description": "Government release calendars for macro events", "weight": 1 },
+        { "id": "Q4-S4", "type": "primary-document", "description": "Exchange documentation if discussing specific direct feeds", "weight": 1 }
+      ],
+      "penalize_if": [
+        "Says institutions simply get insider news.",
+        "Ignores legality and compliance.",
+        "Ignores scheduled economic releases.",
+        "Ignores expectations vs actual surprise.",
+        "Ignores direct feeds/co-location.",
+        "Tells retail traders they can realistically beat HFT firms on raw speed.",
+        "Gives generic advice like follow Twitter faster."
+      ],
+      "methodology_notes": "Q4 is a domain-depth gate requiring market intelligence infrastructure detail, legality, and realistic retail framing."
+    },
+    {
+      "question_id": "Q5",
+      "gold_answer": "The right architecture is a staged retrieval-quality pipeline, not a single embedding search. It should ingest source results, normalize them into a common chunk schema, extract claims, detect duplicates, measure novelty, select the best information subset under a token budget, and update source reliability over time. Deduplication should combine canonicalization, lexical similarity, embedding similarity, and claim-level overlap across document, chunk, and claim levels. Cosine similarity alone is insufficient because different wording can report the same claim, similar documents can contain different primary evidence, and syndication can repeat the same reporting. The information-theoretic layer measures marginal novelty relative to already-selected context, using token/entity/claim overlap at first and later Jensen-Shannon, KL-style, or claim-distribution divergence where appropriate. Assembly is a budgeted coverage problem where chunk benefit combines relevance, authority, freshness, claim coverage, novelty, and epistemic stance; greedy submodular-style selection is practical. A Bayesian reliability layer should start with source-type priors and update from observed confirmations, corrections, contradictions, and repeated claims, while guarding against correlated sources, syndication, citation loops, herd behavior, domain specialization, recency decay, and primary-source overrides. The output should include an auditable trace.",
+      "must_hit_atomic_facts": [
+        { "id": "Q5-F1", "text": "This is a staged pipeline, not just vector search.", "keywords": ["staged pipeline", "not just vector"], "weight": 1 },
+        { "id": "Q5-F2", "text": "Must normalize sources into a common chunk schema.", "keywords": ["normalize", "common chunk schema"], "weight": 1 },
+        { "id": "Q5-F3", "text": "Must deduplicate at document, chunk, and claim level.", "keywords": ["document", "chunk", "claim"], "weight": 1 },
+        { "id": "Q5-F4", "text": "Must combine deterministic matching, embeddings, and claim overlap.", "keywords": ["canonicalization", "embeddings", "claim overlap"], "weight": 1 },
+        { "id": "Q5-F5", "text": "Must explain why cosine similarity alone is insufficient.", "keywords": ["cosine", "insufficient"], "weight": 1 },
+        { "id": "Q5-F6", "text": "Must include information-theoretic or marginal novelty scoring.", "keywords": ["marginal novelty", "information-theoretic", "Jensen-Shannon", "KL"], "weight": 1 },
+        { "id": "Q5-F7", "text": "Must describe token-budgeted assembly as a coverage/selection problem.", "keywords": ["token budget", "coverage", "selection"], "weight": 1 },
+        { "id": "Q5-F8", "text": "Must mention submodular-style greedy selection.", "keywords": ["submodular", "greedy"], "weight": 1 },
+        { "id": "Q5-F9", "text": "Must include Bayesian priors and updates for source reliability.", "keywords": ["Bayesian", "priors", "updates"], "weight": 1 },
+        { "id": "Q5-F10", "text": "Must warn against treating consensus as truth.", "keywords": ["consensus", "truth"], "weight": 1 },
+        { "id": "Q5-F11", "text": "Must account for source correlation/syndication/herding.", "keywords": ["correlation", "syndication", "herding"], "weight": 1 },
+        { "id": "Q5-F12", "text": "Must produce traceable/auditable outputs.", "keywords": ["trace", "auditable"], "weight": 1 }
+      ],
+      "required_source_types": [
+        { "id": "Q5-S1", "type": "code", "description": "Embedding model docs", "weight": 1 },
+        { "id": "Q5-S2", "type": "academic", "description": "Submodular optimization or summarization literature", "weight": 1 },
+        { "id": "Q5-S3", "type": "academic", "description": "Truth discovery or source reliability literature", "weight": 1 },
+        { "id": "Q5-S4", "type": "academic", "description": "Information theory reference for KL/Jensen-Shannon if using those terms", "weight": 1 }
+      ],
+      "penalize_if": [
+        "Only says use embeddings and cluster them.",
+        "Ignores claim-level duplication.",
+        "Ignores token budget.",
+        "Treats all sources as independent.",
+        "Treats consensus as truth.",
+        "Ignores source-type priors.",
+        "Ignores traceability.",
+        "Uses advanced math terms without explaining where they enter the pipeline."
+      ],
+      "methodology_notes": "Q5 is a technical source-attribution benchmark. Day 1 implementation may defer advanced KL/Jensen-Shannon and Bayesian reliability, but answers must know where they belong."
+    }
+  ]
+}

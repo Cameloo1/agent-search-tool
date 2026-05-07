@@ -1,0 +1,41 @@
+{
+  "name": "@agent-search/core",
+  "version": "0.1.0",
+  "private": false,
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/core/src/index.js",
+  "types": "./dist/core/src/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/core/src/index.d.ts",
+      "import": "./dist/core/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@agent-search/embeddings": "workspace:*",
+    "@agent-search/llm": "workspace:*",
+    "@agent-search/shared": "workspace:*",
+    "@agent-search/sources": "workspace:*",
+    "@mozilla/readability": "^0.6.0",
+    "jsdom": "^29.1.1",
+    "pdf-parse": "^2.4.5",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^28.0.1",
+    "@types/pdf-parse": "^1.1.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

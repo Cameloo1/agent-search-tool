@@ -1,0 +1,25 @@
+{
+  "name": "agent-search-tool",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:all": "node scripts/dev.mjs",
+    "build": "corepack pnpm -r build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev:api": "corepack pnpm --filter @agent-search/api dev",
+    "dev:web": "corepack pnpm --filter @agent-search/web dev",
+    "cli:search": "corepack pnpm --filter @agent-search/cli search",
+    "cli:compare": "corepack pnpm --filter @agent-search/cli compare",
+    "typecheck": "corepack pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.12",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

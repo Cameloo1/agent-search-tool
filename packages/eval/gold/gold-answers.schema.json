@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Search Gold Answers",
+  "type": "object",
+  "required": ["version", "methodology", "questions", "answers"],
+  "properties": {
+    "version": { "type": "string" },
+    "methodology": { "type": "string" },
+    "questions": { "type": "array", "minItems": 5, "maxItems": 5 },
+    "answers": { "type": "array", "minItems": 5, "maxItems": 5 }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "baseUrl": ".",
+    "paths": {
+      "@agent-search/shared": ["packages/shared/src/index.ts"],
+      "@agent-search/llm": ["packages/llm/src/index.ts"],
+      "@agent-search/sources": ["packages/sources/src/index.ts"],
+      "@agent-search/embeddings": ["packages/embeddings/src/index.ts"],
+      "@agent-search/core": ["packages/core/src/index.ts"],
+      "@agent-search/eval": ["packages/eval/src/index.ts"],
+      "@agent-search/sdk": ["packages/sdk/src/index.ts"],
+      "@agent-search/adapters": ["packages/adapters/src/index.ts"]
+    },
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  }
+}
