@@ -9,7 +9,7 @@ import { hackerNewsHandler } from "./hackerNews.js";
 import { openAlexHandler } from "./openAlex.js";
 import { officialDocsHandler } from "./officialDocs.js";
 import { pubmedHandler } from "./pubmed.js";
-import { secEdgarHandler } from "./secEdgar.js";
+import { secEdgarHandler, secEftsSearchUrl } from "./secEdgar.js";
 import { semanticScholarHandler } from "./semanticScholar.js";
 import { stackExchangeHandler } from "./stackExchange.js";
 import { wikidataHandler } from "./wikidata.js";
@@ -260,6 +260,52 @@ describe("source handlers", () => {
     const result = await secEdgarHandler.fetch({ ...baseSubQuery, target_sources: ["sec_edgar"] }, options);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.code).toBe("SEC_USER_AGENT_MISSING");
+  });
+
+  it("queries SEC EFTS with GET query parameters and maps current response fields", async () => {
+    const fetchSpy = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        hits: {
+          hits: [
+            {
+              _id: "0001213900-23-033683:f20f2022ex4-19_xiaoicorp.htm",
+              _source: {
+                ciks: ["0001935172"],
+                display_names: ["Xiao-I Corp  (AIXI)  (CIK 0001935172)"],
+                form: "20-F",
+                adsh: "0001213900-23-033683",
+                file_date: "2023-04-28",
+                file_num: ["001-41631"],
+                file_type: "EX-4.19",
+                file_description: "AI cloud platform service contract"
+              }
+            }
+          ]
+        }
+      })
+    }));
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const result = await secEdgarHandler.fetch(
+      { ...baseSubQuery, sub_query: "artificial intelligence", target_sources: ["sec_edgar"] },
+      { ...options, maxResults: 1, secUserAgent: "AgentSearchTool/0.1 contact@example.com" }
+    );
+
+    expect(result.ok).toBe(true);
+    const url = String(fetchSpy.mock.calls[0]?.[0]);
+    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit | undefined;
+    expect(url).toBe(secEftsSearchUrl("artificial intelligence", 1));
+    expect(new URL(url).searchParams.get("q")).toBe("artificial intelligence");
+    expect(init?.method).toBeUndefined();
+    expect((init?.headers as Record<string, string>)?.["User-Agent"]).toContain("AgentSearchTool");
+    if (result.ok) {
+      expect(result.items[0]?.title).toContain("Xiao-I Corp");
+      expect(result.items[0]?.url).toBe(
+        "https://www.sec.gov/Archives/edgar/data/1935172/000121390023033683/f20f2022ex4-19_xiaoicorp.htm"
+      );
+      expect(result.items[0]?.metadata.file_number).toBe("001-41631");
+    }
   });
 
   it("returns constrained official documentation results", async () => {

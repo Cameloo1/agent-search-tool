@@ -4,21 +4,34 @@ import { disabledResult, fetchJson, itemId, safeSourceFetch, toIsoDate } from ".
 
 interface SecSearchResponse {
   hits?: {
-    hits?: Array<{
-      _id?: string;
-      _source?: {
-        file_date?: string;
-        form?: string;
-        company?: string;
-        display_names?: string[];
-        cik?: string;
-        adsh?: string;
-        file_num?: string;
-        filing_url?: string;
-        xsl?: string;
-      };
-    }>;
+    hits?: SecSearchHit[];
   };
+}
+
+const SEC_EFTS_SEARCH_URL = "https://efts.sec.gov/LATEST/search-index";
+
+interface SecSearchHit {
+  _id?: string;
+  _source?: SecSearchSource;
+}
+
+interface SecSearchSource {
+  ciks?: string[];
+  file_date?: string;
+  period_ending?: string | null;
+  form?: string;
+  form_type?: string;
+  root_forms?: string[];
+  company?: string;
+  entity_name?: string;
+  display_names?: string[];
+  cik?: string;
+  adsh?: string;
+  file_num?: string | string[];
+  filing_url?: string;
+  xsl?: string;
+  file_type?: string;
+  file_description?: string | null;
 }
 
 export const secEdgarHandler: SourceHandler = {
@@ -33,41 +46,80 @@ export const secEdgarHandler: SourceHandler = {
     }
     const secUserAgent = options.secUserAgent;
     return safeSourceFetch("sec_edgar", async () => {
-      const body = JSON.stringify({
-        keys: subQuery.sub_query,
-        from: 0,
-        size: options.maxResults,
-        sort: [{ file_date: { order: "desc" } }]
-      });
-      const data = await fetchJson<SecSearchResponse>("https://efts.sec.gov/LATEST/search-index", options.timeoutMs, {
-        method: "POST",
+      const url = secEftsSearchUrl(subQuery.sub_query, options.maxResults);
+      const data = await fetchJson<SecSearchResponse>(url, options.timeoutMs, {
         headers: {
-          "Content-Type": "application/json",
           "User-Agent": secUserAgent,
           Accept: "application/json"
         },
-        body,
         signal: options.signal
       });
       return (data.hits?.hits ?? []).slice(0, options.maxResults).map<RawItem>((hit) => {
         const src = hit._source ?? {};
-        const title = [src.company ?? src.display_names?.[0], src.form].filter(Boolean).join(" ") || null;
-        const filingUrl = src.filing_url ?? src.xsl ?? "https://www.sec.gov/edgar/search/";
+        const form = src.form ?? src.form_type ?? src.root_forms?.[0] ?? src.file_type;
+        const company = src.company ?? src.entity_name ?? cleanDisplayName(src.display_names?.[0]) ?? null;
+        const title = [company, form, src.file_description].filter(Boolean).join(" - ") || null;
+        const filingUrl = secFilingUrl(hit._id, src);
+        const cik = src.cik ?? src.ciks?.[0];
+        const fileNumber = Array.isArray(src.file_num) ? src.file_num.filter(Boolean).join(", ") : src.file_num;
         return {
-          id: itemId("sec_edgar", hit._id ?? `${src.cik}:${src.adsh}:${src.form}`),
+          id: itemId("sec_edgar", hit._id ?? `${cik}:${src.adsh}:${form}`),
           source: "sec_edgar",
           source_type: "filing",
-          url: filingUrl.startsWith("http") ? filingUrl : `https://www.sec.gov${filingUrl}`,
+          url: filingUrl,
           title,
-          author: src.company ?? null,
+          author: company,
           publish_date: toIsoDate(src.file_date),
-          text: [title, src.file_date ? `Filed ${src.file_date}` : "", src.file_num ? `File number ${src.file_num}` : ""]
+          text: [
+            title,
+            src.file_date ? `Filed ${src.file_date}` : "",
+            src.period_ending ? `Period ending ${src.period_ending}` : "",
+            fileNumber ? `File number ${fileNumber}` : ""
+          ]
             .filter(Boolean)
             .join("\n\n"),
           summary: null,
-          metadata: { cik: src.cik, accession: src.adsh, form: src.form, file_number: src.file_num }
+          metadata: { cik, accession: src.adsh, form, file_number: fileNumber, file_type: src.file_type }
         };
       });
     });
   }
 };
+
+export function secEftsSearchUrl(query: string, maxResults: number): string {
+  const params = new URLSearchParams({
+    q: query,
+    from: "0",
+    size: String(Math.max(1, Math.min(100, maxResults)))
+  });
+  return `${SEC_EFTS_SEARCH_URL}?${params.toString()}`;
+}
+
+function secFilingUrl(hitId: string | undefined, source: SecSearchSource = {}): string {
+  const directUrl = source.filing_url ?? source.xsl;
+  if (directUrl) return directUrl.startsWith("http") ? directUrl : `https://www.sec.gov${directUrl}`;
+
+  const parsed = parseHitId(hitId);
+  const cik = source.cik ?? source.ciks?.[0];
+  const accession = source.adsh ?? parsed?.accession;
+  const filename = parsed?.filename;
+  if (cik && accession && filename) {
+    return `https://www.sec.gov/Archives/edgar/data/${stripLeadingZeros(cik)}/${accession.replace(/-/g, "")}/${filename}`;
+  }
+
+  return "https://www.sec.gov/search-filings";
+}
+
+function parseHitId(hitId: string | undefined): { accession: string; filename: string } | undefined {
+  const [accession, filename] = hitId?.split(":") ?? [];
+  if (!accession || !filename) return undefined;
+  return { accession, filename };
+}
+
+function cleanDisplayName(value: string | undefined): string | undefined {
+  return value?.replace(/\s*\(CIK\s+\d+\)\s*/i, "").trim() || undefined;
+}
+
+function stripLeadingZeros(value: string): string {
+  return value.replace(/^0+/, "") || "0";
+}

@@ -844,9 +844,15 @@ function buildTimelineRows(events: PipelineProgressEvent[]): TimelineRow[] {
       elapsedMs,
       deltaMs,
       durationMs: eventDurationMs(event),
-      severity: event.type === "fatal" || event.type === "stage_error" || (event.type === "source_complete" && !event.ok) ? "error" : "normal"
+      severity: eventSeverity(event)
     };
   });
+}
+
+function eventSeverity(event: PipelineProgressEvent): TimelineRow["severity"] {
+  if (event.type === "fatal" || event.type === "stage_error") return "error";
+  if (event.type !== "source_complete" || event.ok) return "normal";
+  return event.error?.category === "missing_config" ? "normal" : "error";
 }
 
 function EventDetailPanel({ row, trace, onClose }: { row: TimelineRow; trace?: Trace; onClose: () => void }) {
@@ -937,7 +943,9 @@ function progressEventMessage(event: PipelineProgressEvent): string {
     return `${event.source}: querying ${event.sub_query}`;
   }
   if (event.type === "source_complete") {
-    return `${event.source}: ${event.ok ? `${event.item_count} item(s)` : event.error?.message ?? "failed"}`;
+    if (event.ok) return `${event.source}: ${event.item_count} item(s)`;
+    if (event.error?.category === "missing_config") return `${event.source}: skipped - ${event.error.message}`;
+    return `${event.source}: ${event.error?.message ?? "failed"}`;
   }
   if (event.type === "counts") {
     return `Counts updated: ${Object.entries(event.counts)

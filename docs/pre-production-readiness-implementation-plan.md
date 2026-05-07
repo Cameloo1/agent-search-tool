@@ -205,3 +205,12 @@ Selected dependency decision:
 - Changed balanced synthesis to `openai/gpt-5.5` and enabled reasoning for the balanced synthesis stage only.
 - Added synthesis prompt context: the call is the user-facing answer writer for an evidence engine and should turn selected, scored chunks into a direct cited answer.
 - Focused verification passed for gap analysis, model routing, pipeline behavior, and API route coverage. Full `pnpm test` and workspace `pnpm typecheck` passed.
+
+### 2026-05-07T13:37:17-05:00
+
+- Fixed SEC EDGAR live search failures caused by the old POST body to `https://efts.sec.gov/LATEST/search-index`, which returned `HTTP 403: Missing Authentication Token`.
+- Updated the SEC handler to use the working EFTS GET query shape with `q`, `from`, and `size` parameters, keep the configured SEC `User-Agent`, and normalize current EFTS response fields such as `ciks`, `display_names`, `file_description`, `file_num`, and Archives filing URLs.
+- Added a regression test proving SEC uses GET query parameters and maps the current response shape.
+- Confirmed local `.env` has `SEC_USER_AGENT` configured. Live source checks passed for SEC EDGAR, GitHub without token, and Semantic Scholar without key. CORE remains a controlled missing-config skip until `CORE_API_KEY` is added.
+- Adjusted progress timeline severity so missing-config source skips remain visible but do not render as red errors; real HTTP, timeout, rate-limit, and unknown failures still surface as errors.
+- Verification passed: `corepack pnpm --filter @agent-search/sources typecheck`, `corepack pnpm --filter @agent-search/web typecheck`, `corepack pnpm test -- packages/sources/src/sourceHandlers.test.ts`, and `corepack pnpm --filter @agent-search/web build`.
