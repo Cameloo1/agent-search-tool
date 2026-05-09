@@ -8,6 +8,7 @@
     "dev": "node scripts/dev.mjs",
     "dev:all": "node scripts/dev.mjs",
     "build": "corepack pnpm -r build",
+    "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
     "test:watch": "vitest",
     "dev:api": "corepack pnpm --filter @agent-search/api dev",
@@ -17,9 +18,12 @@
     "typecheck": "corepack pnpm -r typecheck"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^20.17.12",
+    "eslint": "^10.3.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.59.2",
     "vitest": "^2.1.8"
   }
 }
