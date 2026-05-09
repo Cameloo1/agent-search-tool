@@ -1,5 +1,11 @@
 # Agent Search Tool
 
+[![Windows Build CI](https://github.com/Cameloo1/agent-search-tool/actions/workflows/windows-build.yml/badge.svg?branch=main)](https://github.com/Cameloo1/agent-search-tool/actions/workflows/windows-build.yml)
+[![Windows Test CI](https://github.com/Cameloo1/agent-search-tool/actions/workflows/windows-test.yml/badge.svg?branch=main)](https://github.com/Cameloo1/agent-search-tool/actions/workflows/windows-test.yml)
+[![ESLint](https://github.com/Cameloo1/agent-search-tool/actions/workflows/eslint.yml/badge.svg?branch=main)](https://github.com/Cameloo1/agent-search-tool/actions/workflows/eslint.yml)
+[![Typechecking](https://github.com/Cameloo1/agent-search-tool/actions/workflows/typechecking.yml/badge.svg?branch=main)](https://github.com/Cameloo1/agent-search-tool/actions/workflows/typechecking.yml)
+[![Automated Testing](https://github.com/Cameloo1/agent-search-tool/actions/workflows/automated-testing.yml/badge.svg?branch=main)](https://github.com/Cameloo1/agent-search-tool/actions/workflows/automated-testing.yml)
+
 Agent Search is a source-gated evidence engine for AI applications and research agents. It turns a user query into planned source calls, extracted evidence, scored and deduplicated chunks, a cited synthesized answer, and a full trace of how the result was produced.
 
 It can run as a local API + compare devtool, or be dropped into another TypeScript agent app as a registry-ready tool suite through `@agent-search/sdk`.
