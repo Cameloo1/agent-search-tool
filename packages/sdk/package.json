@@ -28,7 +28,7 @@
     "@agent-search/sources": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.7.2",
+    "typescript": "^6.0.3",
     "vitest": "^2.1.8"
   }
 }
