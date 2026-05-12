@@ -6,7 +6,7 @@
       "id": "Q1",
       "category": "Debt, spending, inflation, fiscal capacity, AI productivity, and AI infrastructure strain",
       "query_types": ["multi-hop", "adversarial", "fresh-fact"],
-      "question": "What’s gonna happen if we keep spending more and more money on debt? How can we approach fixing this, and how is AI poised to help exactly? What is it currently doing that’s pushing us towards this?"
+      "question": "What\u2019s gonna happen if we keep spending more and more money on debt? How can we approach fixing this, and how is AI poised to help exactly? What is it currently doing that\u2019s pushing us towards this?"
     },
     {
       "id": "Q2",
@@ -24,7 +24,7 @@
       "id": "Q4",
       "category": "Institutional news speed, market intelligence infrastructure, banks/traders, data feeds, macro releases, filings, squawk, co-location, legality",
       "query_types": ["source-attribution", "adversarial"],
-      "question": "To match and beat top traders, I want to learn about how institutions and banks get news updates fast and quick to gain a competitive edge over other traders in markets? I’d like to know about their strategies and infrastructure so that I can research more about this."
+      "question": "To match and beat top traders, I want to learn about how institutions and banks get news updates fast and quick to gain a competitive edge over other traders in markets? I\u2019d like to know about their strategies and infrastructure so that I can research more about this."
     },
     {
       "id": "Q5",

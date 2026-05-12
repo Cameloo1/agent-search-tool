@@ -17,6 +17,37 @@ import type {
 } from "./types";
 
 const DEFAULT_API_BASE_URL = "http://localhost:3001";
+const BENCHMARK_QUESTIONS: Array<{ id: string; question: string }> = [
+  {
+    id: "Q1",
+    question:
+      "What\u2019s gonna happen if we keep spending more and more money on debt? How can we approach fixing this, and how is AI poised to help exactly? What is it currently doing that\u2019s pushing us towards this?"
+  },
+  {
+    id: "Q2",
+    question:
+      "How to use [LLM like GPT-5.5] for appsec and pre-production testing the correct way? Why exactly are most vibecode projects unsecure and unoptimized? What can I do to close this gap?"
+  },
+  {
+    id: "Q3",
+    question:
+      "I want to learn more about retail and institution activity during market downturns, and how each one influenced geopolitical events and markets after, years to come. All notable market downturns, categorize by 1900s and 2000s to present. What are the most impactful events, and how are they still affecting debt, inflation, and economy sentiment / confidence to this present day?"
+  },
+  {
+    id: "Q4",
+    question:
+      "To match and beat top traders, I want to learn about how institutions and banks get news updates fast and quick to gain a competitive edge over other traders in markets? I\u2019d like to know about their strategies and infrastructure so that I can research more about this."
+  },
+  {
+    id: "Q5",
+    question:
+      "How can I build an advanced data pipeline that first identifies domain-specific duplicates using information-theoretic and learned similarity measures, then optimizes the assembly of those deduplicated chunks by treating information coverage as a submodular optimization problem within a token budget, and finally incorporates a dynamic Bayesian reliability layer to weight those sources based on their historical agreement or disagreement with the consensus?"
+  }
+];
+
+const BENCHMARK_QUESTION_ID_BY_CANONICAL_QUERY = new Map(
+  BENCHMARK_QUESTIONS.map((question) => [canonicalBenchmarkText(question.question), question.id])
+);
 
 export function getApiBaseUrl() {
   const configured = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
@@ -461,8 +492,19 @@ function looksLikeCompareResult(value: unknown): value is ApiCompareResult {
   return isObject(value) && ("engine_name" in value || "final_answer" in value || "sources_cited" in value);
 }
 
-function questionIdFromQuery(query: string) {
-  return query.trim() ? "ad-hoc" : "ad-hoc";
+export function questionIdFromQuery(query: string) {
+  return BENCHMARK_QUESTION_ID_BY_CANONICAL_QUERY.get(canonicalBenchmarkText(query)) ?? "ad-hoc";
+}
+
+export function canonicalBenchmarkText(value: string) {
+  return value
+    .normalize("NFKC")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, "\"")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
 function slug(value: string) {

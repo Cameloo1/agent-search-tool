@@ -1,6 +1,9 @@
 # Agent Search Tool
 
 [![CI](https://img.shields.io/github/check-runs/Cameloo1/agent-search-tool/main?label=CI)](https://github.com/Cameloo1/agent-search-tool/actions?query=branch%3Amain)
+[![MIT](https://img.shields.io/badge/MIT-license-green)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-typed-3178c6?logo=typescript&logoColor=white)](tsconfig.base.json)
+[![SDK Ready](https://img.shields.io/badge/SDK-ready-2ea44f)](packages/sdk/README.md)
 
 Agent Search is a source-gated evidence engine for AI applications and research agents. It turns a user query into planned source calls, extracted evidence, scored and deduplicated chunks, a cited synthesized answer, and a full trace of how the result was produced.
 
@@ -115,6 +118,8 @@ export const companyDocsPlugin = defineSourcePlugin({
 
 Source ids must match `^[a-z][a-z0-9_:-]{1,63}$`. Built-in source ids remain valid and cannot be spoofed by plugins.
 
+For practical custom source, pre-parser, and engine wiring guidance, see [docs/CUSTOM_SOURCES.md](docs/CUSTOM_SOURCES.md).
+
 ## Local Development
 
 ```powershell
@@ -153,7 +158,7 @@ corepack pnpm cli:compare
 
 ```json
 {
-  "query": "How do institutions get market news quickly?",
+  "query": "What evidence supports CRISPR base editing as a treatment path for sickle cell disease?",
   "chat_history": [],
   "memory_snippet": "optional per-query context",
   "token_budget": 1800,
