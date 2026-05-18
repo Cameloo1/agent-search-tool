@@ -6,7 +6,7 @@ type ScoreBadgeProps = {
 };
 
 const LABELS: Record<ScoreStatus, string> = {
-  scored: "Scored",
+  scored: "Gold precheck",
   blocked_missing_gold: "Scoring unavailable",
   blocked_invalid_gold: "Gold invalid",
   scoring_unavailable: "Scoring unavailable"
@@ -14,7 +14,7 @@ const LABELS: Record<ScoreStatus, string> = {
 
 export function ScoreBadge({ status = "scoring_unavailable", evidenceChecked = false }: ScoreBadgeProps) {
   if (evidenceChecked && status !== "scored") {
-    return <span className="score-badge evidence">Evidence Checked</span>;
+    return <span className="score-badge evidence">Evidence diagnostics</span>;
   }
 
   const className =

@@ -46,7 +46,7 @@ export const secEdgarHandler: SourceHandler = {
     }
     const secUserAgent = options.secUserAgent;
     return safeSourceFetch("sec_edgar", async () => {
-      const url = secEftsSearchUrl(subQuery.sub_query, options.maxResults);
+      const url = secEftsSearchUrl(compactSecSearchQuery(subQuery.sub_query), options.maxResults);
       const data = await fetchJson<SecSearchResponse>(url, options.timeoutMs, {
         headers: {
           "User-Agent": secUserAgent,
@@ -95,6 +95,48 @@ export function secEftsSearchUrl(query: string, maxResults: number): string {
   return `${SEC_EFTS_SEARCH_URL}?${params.toString()}`;
 }
 
+export function compactSecSearchQuery(query: string): string {
+  const cleaned = query
+    .replace(/\bsite:(?:sec_edgar|sec\.gov|www\.sec\.gov)\b/gi, " ")
+    .replace(/[()[\],?]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!cleaned) return query.trim();
+
+  const shouldCompact = cleaned !== query.trim() || cleaned.length > 96 || encodeURIComponent(cleaned).length > 140;
+  if (!shouldCompact) return cleaned;
+
+  const lower = cleaned.toLowerCase();
+  const forms = unique(
+    cleaned.match(/\b(?:10-k|10-q|8-k|20-f|6-k|s-1)s?\b/gi)?.map((form) => form.replace(/s$/i, "").toUpperCase()) ?? []
+  );
+  const priority = [
+    /\b(?:ai|artificial intelligence)\b/i.test(cleaned) ? "AI" : "",
+    /\binference\b/i.test(cleaned) ? "inference" : "",
+    /\bcompute\b/i.test(cleaned) ? "compute" : "",
+    /\b(?:capex|capital expenditures?)\b/i.test(cleaned) ? "capital expenditure" : "",
+    /\binfrastructure\b/i.test(cleaned) ? "infrastructure" : "",
+    /\bdata centers?\b/i.test(cleaned) ? "data center" : "",
+    /\bgpus?\b/i.test(cleaned) ? "GPU" : "",
+    /\bcloud\b/i.test(cleaned) ? "cloud" : ""
+  ].filter(Boolean);
+  if (priority.length >= 2) {
+    return unique([...priority.slice(0, 5), ...forms]).join(" ");
+  }
+
+  const priorityTokens = new Set(priority.flatMap((phrase) => phrase.toLowerCase().split(/\s+/)));
+  const formTokens = new Set(forms.map((form) => form.toLowerCase()));
+  const remainder = cleaned
+    .split(/\s+/)
+    .map((token) => token.replace(/[^a-z0-9-]/gi, ""))
+    .filter(Boolean)
+    .filter((token) => !SEC_QUERY_STOPWORDS.has(token.toLowerCase()))
+    .filter((token) => !priorityTokens.has(token.toLowerCase()))
+    .filter((token) => !formTokens.has(token.toLowerCase()))
+    .slice(0, 4);
+  return unique([...priority, ...forms, ...remainder]).join(" ") || cleaned.slice(0, 96);
+}
+
 function secFilingUrl(hitId: string | undefined, source: SecSearchSource = {}): string {
   const directUrl = source.filing_url ?? source.xsl;
   if (directUrl) return directUrl.startsWith("http") ? directUrl : `https://www.sec.gov${directUrl}`;
@@ -123,3 +165,54 @@ function cleanDisplayName(value: string | undefined): string | undefined {
 function stripLeadingZeros(value: string): string {
   return value.replace(/^0+/, "") || "0";
 }
+
+function unique(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean))];
+}
+
+const SEC_QUERY_STOPWORDS = new Set([
+  "and",
+  "against",
+  "capex",
+  "companies",
+  "company",
+  "disclosed",
+  "disclosures",
+  "driver",
+  "edgar",
+  "explicitly",
+  "extract",
+  "filing",
+  "filings",
+  "for",
+  "have",
+  "in",
+  "identified",
+  "increase",
+  "increases",
+  "latest",
+  "material",
+  "mention",
+  "names",
+  "most",
+  "not",
+  "of",
+  "or",
+  "public",
+  "publicly",
+  "quoted",
+  "rationale",
+  "references",
+  "reasons",
+  "recent",
+  "sec",
+  "specifically",
+  "that",
+  "the",
+  "they",
+  "tied",
+  "to",
+  "traded",
+  "what",
+  "which"
+]);

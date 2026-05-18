@@ -1,9 +1,9 @@
 # Agent Search Tool
 
-[![CI](https://img.shields.io/github/check-runs/Cameloo1/agent-search-tool/main?label=CI)](https://github.com/Cameloo1/agent-search-tool/actions?query=branch%3Amain)
-[![MIT](https://img.shields.io/badge/MIT-license-green)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-typed-3178c6?logo=typescript&logoColor=white)](tsconfig.base.json)
-[![SDK Ready](https://img.shields.io/badge/SDK-ready-2ea44f)](packages/sdk/README.md)
+[![CI](https://img.shields.io/github/check-runs/Cameloo1/agent-search-tool/main?label=CI&style=for-the-badge)](https://github.com/Cameloo1/agent-search-tool/actions?query=branch%3Amain)
+[![MIT](https://img.shields.io/badge/MIT-license-green?style=for-the-badge)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-typed-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](tsconfig.base.json)
+[![SDK Ready](https://img.shields.io/badge/SDK-ready-2ea44f?style=for-the-badge)](packages/sdk/README.md)
 
 Agent Search is a source-gated evidence engine for AI applications and research agents. It turns a user query into planned source calls, extracted evidence, scored and deduplicated chunks, a cited synthesized answer, and a full trace of how the result was produced.
 

@@ -155,9 +155,48 @@ Interpretation rules:
 - Repair rounds are sequential. Each round repeats fetch, normalize, pre-rank, score, reliability, dedup, assemble, evidence health, and gap analysis.
 - Heartbeat progress messages are not separate work. They are emitted every 5s while a stage is still awaiting the underlying operation.
 
-## Latest Run Baseline
+## Latest Inference-Capex SEC Rerun
 
-This baseline comes from `data/debug-runs/latest.json`.
+This baseline comes from `data/debug-runs/latest.json` after the SEC EDGAR handler fix that strips internal source-routing hints and compacts over-specific SEC search text before calling EFTS.
+
+| Field | Value |
+| --- | --- |
+| Request ID | `6e6a3642-80d1-4f08-85a1-af240228dc78` |
+| Query | `Which publicly-traded AI infrastructure companies have specifically disclosed material capital expenditure increases tied to inference compute (not training compute) in their most recent 10-Ks or 10-Qs, and what reasons did they give?` |
+| Quality mode | `balanced` |
+| Synthesis | `true` |
+| Started | `2026-05-18T04:07:18.140Z` |
+| Finished | `2026-05-18T04:07:37.424Z` |
+| Debug written | `2026-05-18T04:07:37.427Z` |
+| Events | `99` |
+| Wall time | about `19.3s` |
+| Sum of stage timings | `19277ms` |
+| Final counts | `48 raw`, `77 normalized`, `1 scored`, `76 filtered`, `1 deduped`, `1 selected` |
+| Total model tokens | `18523` |
+| Total model cost | `$0.00992871` |
+| Evidence health | `insufficient` (`34` quality, `34` coverage) |
+| Gap status | `synthesize_cautiously`, stop reason `critical_gaps_not_retryable` |
+| SEC EDGAR result | `6 queried`, `6 ok`, `0 failed`, aggregate `6.559s`; no `HTTP_403` and no SEC source errors. |
+| Selected SEC evidence | `1` filing chunk: `BLUSKY AI INC. (BSAI) - 10-K - 10-K`. |
+| Remaining source failures | `wikidata` returned `HTTP_403`; `github` returned `HTTP_422` for an over-long/invalid query. |
+| Synthesis caveat | The synthesis and review stages used deterministic fallbacks after provider-side schema/credit-limit failures; this run proves SEC access health, not answer completeness. |
+
+Source result summary:
+
+| Source | Queried | OK | Failed | Aggregate timing | Notes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `data_gov` | 1 | 1 | 0 | `0.272s` | Healthy. |
+| `github` | 1 | 0 | 1 | `0.199s` | HTTP 422 query-invalid. |
+| `hacker_news` | 1 | 1 | 0 | `0.370s` | Healthy. |
+| `official_docs` | 3 | 3 | 0 | `3.798s` | Healthy. |
+| `sec_edgar` | 6 | 6 | 0 | `6.559s` | Healthy; fixed path no longer returns the old 403 or the transient 500 from verbose SEC queries. |
+| `stack_exchange` | 2 | 2 | 0 | `0.452s` | Healthy. |
+| `wikidata` | 1 | 0 | 1 | `0.339s` | HTTP 403 unavailable. |
+| `wikipedia` | 1 | 1 | 0 | `0.686s` | Healthy. |
+
+## Previous RRF Latency Baseline
+
+This historical latency baseline came from an earlier `data/debug-runs/latest.json` snapshot for the RRF/cross-encoder query. It is retained for timing comparison only; its SEC missing-config row is not the current SEC health state.
 
 | Field | Value |
 | --- | --- |
@@ -175,7 +214,7 @@ This baseline comes from `data/debug-runs/latest.json`.
 | Total model tokens | `92161` |
 | Total model cost | `$0.258158835` |
 
-## Latest Run Major Event Timeline
+## Previous RRF Major Event Timeline
 
 `Elapsed` is time since trace start. `Delta` is time since the previous major event in this table.
 
@@ -216,7 +255,7 @@ This baseline comes from `data/debug-runs/latest.json`.
 | `301.312s` | `50.017s` | complete | `synthesis_review` | `50017ms` | Two 25s review attempts timed out; deterministic cautious review used. |
 | `301.318s` | `0.006s` | final | final response | - | Final SSE event emitted. |
 
-## Latest Run Stage Timing Table
+## Previous RRF Stage Timing Table
 
 | Stage | Runtime | Why it was long or short |
 | --- | ---: | --- |
@@ -244,7 +283,7 @@ This baseline comes from `data/debug-runs/latest.json`.
 
 Tiny repair-local stages not expanded above were all local and near-zero: repair normalize `2-5ms`, repair pre-rank `1-6ms`, repair reliability `0-1ms`, repair dedup `3-24ms`, repair assemble `0-1ms`, repair evidence health `0ms`.
 
-## Latest Run LLM Calls
+## Previous RRF LLM Calls
 
 | Stage | Attempts / calls | Observed models | Outcome | Runtime notes |
 | --- | ---: | --- | --- | --- |
@@ -266,7 +305,7 @@ Cost/token summary by stage:
 
 Note: `structured_llm_calls` records both adjudicator timeout attempts, but cost summary only includes provider metadata returned by the provider/cost wrapper.
 
-## Latest Run Scoring Batches
+## Previous RRF Scoring Batches
 
 Stage 6 is batched. Wall time for a scoring stage is roughly the slowest concurrent batch wave, not the sum of all batch rows.
 
@@ -287,7 +326,7 @@ Stage 6 is batched. Wall time for a scoring stage is roughly the slowest concurr
 | `repair_4_stage6_score` | 1 | 8 | 0 | 8 | 1 | 6981 | `20.951s` |
 | `repair_4_stage6_score` | 2 | 2 | 0 | 2 | 1 | 3265 | `13.178s` |
 
-## Latest Run Repair Rounds
+## Previous RRF Repair Rounds
 
 | Round | Raw | Normalized | Scored | Filtered | Deduped | Selected | Health | Retry? | Why it continued/stopped |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
@@ -307,7 +346,7 @@ Pre-rank summary:
 | 3 | 2 | 85 | 18 | 67 | 12 | 12 | `semantic_scholar`, `wikidata` |
 | 4 | 3 | 87 | 18 | 69 | 12 | 12 | `semantic_scholar`, `wikidata`, `sec_edgar` |
 
-## Latest Run Source Results
+## Previous RRF Source Results
 
 | Source | Queried | OK | Failed | Aggregate timing | Notes |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -317,12 +356,12 @@ Pre-rank summary:
 | `github` | 12 | 12 | 0 | `2.629s` | Healthy. |
 | `official_docs` | 12 | 12 | 0 | `11.332s` | Healthy but moderate aggregate time. |
 | `openalex` | 3 | 3 | 0 | `1.991s` | Healthy. |
-| `sec_edgar` | 2 | 0 | 2 | `0.000s` | Missing `SEC_USER_AGENT`; skipped as missing config. |
+| `sec_edgar` | 2 | 0 | 2 | `0.000s` | Historical old-RRF snapshot: missing config skip, not the current SEC state. The latest inference-capex rerun above has `6 ok / 0 failed`. |
 | `semantic_scholar` | 1 | 0 | 1 | `0.261s` | HTTP 429 rate limited. |
 | `stack_exchange` | 3 | 3 | 0 | `0.918s` | Healthy. |
 | `wikidata` | 1 | 0 | 1 | `0.359s` | HTTP 403 unavailable. |
 
-## Latest Run Evidence State
+## Previous RRF Evidence State
 
 Final evidence health:
 
@@ -336,7 +375,7 @@ Final evidence health:
 - Selected evidence: `9` chunks, `16` atomic claims, `3` distinct sources, `1` distinct source type
 - Primary/official represented: `8`
 - Missing expected source type: `code`
-- Failed important sources: `semantic_scholar`, `wikidata`, `sec_edgar`
+- Historical failed important sources in this older RRF snapshot: `semantic_scholar`, `wikidata`, `sec_edgar`. Current SEC health is tracked in the inference-capex rerun above.
 
 Final gap analysis:
 
@@ -347,9 +386,9 @@ Final gap analysis:
 - Source type gap: `code`
 - Stop reason: `critical_gaps_not_retryable`
 
-## Current Bottleneck Reading
+## Previous RRF Bottleneck Reading
 
-The latest run was not slow because local deterministic steps were expensive. Local normalize, pre-rank, reliability, dedup, assembly, and evidence health were all sub-100ms per block. The runtime was dominated by LLM timeout policy and repeated repair rounds:
+The previous RRF run was not slow because local deterministic steps were expensive. Local normalize, pre-rank, reliability, dedup, assembly, and evidence health were all sub-100ms per block. The runtime was dominated by LLM timeout policy and repeated repair rounds:
 
 1. Stage 2 consumed `60.027s` because two strategy attempts each reached the 30s timeout before fallback.
 2. Repair scoring consumed `112.996s` across rounds 1-4, with round 2 alone taking `51.611s`.

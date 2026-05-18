@@ -3,6 +3,7 @@ import {
   type CitedSource,
   type EvaluationResult,
   type GoldAnswer,
+  type RequiredSource,
   type ScoreStatus
 } from "@agent-search/shared";
 export type ScoredSource = CitedSource;
@@ -17,6 +18,64 @@ export interface ScoreInput {
   gold?: GoldAnswer;
   scoreStatus?: ScoreStatus;
 }
+
+const PRIMARY_SOURCE_TYPES = new Set(["filing", "government", "medical", "code", "structured_fact"]);
+const PRIMARY_SOURCE_NAMES = new Set(["sec_edgar", "data_gov", "github", "pubmed", "official_docs"]);
+const ACADEMIC_SOURCE_NAMES = new Set(["arxiv", "semantic_scholar", "openalex", "crossref", "core"]);
+const GOVERNMENT_SOURCE_NAMES = new Set(["sec_edgar", "data_gov", "official_docs"]);
+const ENCYCLOPEDIC_SOURCE_NAMES = new Set(["wikipedia", "wikidata"]);
+const FORUM_SOURCE_NAMES = new Set(["stack_exchange", "hacker_news"]);
+
+const DESCRIPTOR_STOPWORDS = new Set([
+  "a",
+  "an",
+  "and",
+  "are",
+  "as",
+  "at",
+  "be",
+  "by",
+  "data",
+  "doc",
+  "docs",
+  "document",
+  "documents",
+  "for",
+  "from",
+  "guidance",
+  "if",
+  "in",
+  "include",
+  "includes",
+  "or",
+  "official",
+  "on",
+  "source",
+  "sources",
+  "specific",
+  "the",
+  "to",
+  "type",
+  "when",
+  "with"
+]);
+
+const DESCRIPTOR_ALIAS_GROUPS = [
+  ["cbo", "congressional budget office"],
+  ["treasury", "fiscal data", "fiscaldata"],
+  ["fred", "federal reserve economic data"],
+  ["iea", "international energy agency"],
+  ["federal reserve", "fed"],
+  ["owasp", "asvs"],
+  ["nist", "ssdf"],
+  ["cisa"],
+  ["bls", "bureau of labor statistics"],
+  ["sec", "securities and exchange commission"],
+  ["edgar"],
+  ["exchange", "nyse", "nasdaq", "cboe"],
+  ["pubmed"],
+  ["github"]
+];
 
 export function scoreAgainstGold(input: ScoreInput): EvaluationResult {
   if (!input.finalAnswer.trim()) {
@@ -57,9 +116,7 @@ export function scoreAgainstGold(input: ScoreInput): EvaluationResult {
 
   const answerText = normalize(input.finalAnswer);
   const factsHit = input.gold.must_hit_atomic_facts.filter((fact) => factHit(answerText, fact.text, fact.keywords)).length;
-  const requiredHit = input.gold.required_source_types.filter((required) =>
-    input.sources.some((source) => source.source_type === mapRequiredSourceType(required.type) || source.provenance === "primary")
-  ).length;
+  const requiredHit = countRequiredSourceHits(input.gold.required_source_types, input.sources);
   const penalties = input.gold.penalize_if.filter((penalty) => penaltyTriggered(answerText, penalty));
 
   return EvaluationResultSchema.parse({
@@ -75,13 +132,31 @@ export function scoreAgainstGold(input: ScoreInput): EvaluationResult {
     unsourced_claims: inferUnsourcedClaims(input.finalAnswer, input.sources),
     token_count: input.tokenCount,
     time_to_result_ms: input.timeToResultMs,
-    notes: ["Claim-level lexical scorer; human audit remains authoritative for benchmark publication."]
+    notes: [
+      "Strict deterministic gold precheck; facts require concept coverage and required sources require distinct descriptor-matched citations.",
+      "Human audit remains authoritative for benchmark publication."
+    ]
   });
 }
 
 function factHit(answer: string, factText: string, keywords: string[]): boolean {
-  const terms = keywords.length ? keywords : factText.split(/[^a-z0-9]+/).filter((term) => term.length > 5).slice(0, 5);
-  return terms.some((term) => answer.includes(normalize(term)));
+  const terms = keywords.map(normalize).filter(Boolean);
+  if (terms.length > 0) {
+    const hits = terms.filter((term) => normalizedIncludes(answer, term)).length;
+    return hits >= requiredKeywordHits(factText, terms.length);
+  }
+
+  const factTokens = meaningfulTokens(factText);
+  if (factTokens.length === 0) return false;
+  const answerTokens = new Set(meaningfulTokens(answer));
+  const hits = factTokens.filter((token) => answerTokens.has(token)).length;
+  return hits >= Math.max(3, Math.ceil(factTokens.length * 0.6));
+}
+
+function requiredKeywordHits(factText: string, count: number): number {
+  if (count <= 2) return count;
+  if (/\bor\b|\/|\bequivalent\b/i.test(factText)) return Math.ceil(count * 0.5);
+  return Math.ceil(count * 0.75);
 }
 
 function penaltyTriggered(answer: string, penalty: string): boolean {
@@ -94,22 +169,104 @@ function penaltyTriggered(answer: string, penalty: string): boolean {
 }
 
 function countPrimarySources(sources: ScoredSource[]): number {
-  return sources.filter((source) => source.provenance === "primary" || ["filing", "government"].includes(source.source_type ?? "")).length;
+  return new Set(sources.filter(isPrimarySource).map(sourceKey)).size;
 }
 
-function mapRequiredSourceType(type: GoldAnswer["required_source_types"][number]["type"]) {
-  const map = {
-    academic: "academic",
-    news: "other",
-    "primary-document": "filing",
-    encyclopedic: "encyclopedic",
-    forum: "forum",
-    code: "code",
-    filing: "filing",
-    government: "government",
-    medical: "medical"
-  } as const;
-  return map[type];
+function countRequiredSourceHits(requiredSources: GoldAnswer["required_source_types"], sources: ScoredSource[]): number {
+  const used = new Set<string>();
+  let hits = 0;
+
+  for (const required of requiredSources) {
+    const match = sources.find((source) => {
+      const key = sourceKey(source);
+      return !used.has(key) && sourceSatisfiesRequiredSource(required, source);
+    });
+
+    if (match) {
+      used.add(sourceKey(match));
+      hits += 1;
+    }
+  }
+
+  return hits;
+}
+
+function sourceSatisfiesRequiredSource(required: RequiredSource, source: ScoredSource): boolean {
+  return sourceTypeCompatible(required.type, source) && sourceMatchesDescriptor(required, source);
+}
+
+function sourceTypeCompatible(type: RequiredSource["type"], source: ScoredSource): boolean {
+  const sourceType = source.source_type;
+  const sourceName = source.source_name;
+
+  if (type === "academic") return sourceType === "academic" || inSet(sourceName, ACADEMIC_SOURCE_NAMES);
+  if (type === "code") return sourceType === "code" || sourceName === "github";
+  if (type === "encyclopedic") return sourceType === "encyclopedic" || inSet(sourceName, ENCYCLOPEDIC_SOURCE_NAMES);
+  if (type === "filing") return sourceType === "filing" || sourceName === "sec_edgar";
+  if (type === "forum") return sourceType === "forum" || sourceType === "tech_discussion" || inSet(sourceName, FORUM_SOURCE_NAMES);
+  if (type === "government") return sourceType === "government" || inSet(sourceName, GOVERNMENT_SOURCE_NAMES);
+  if (type === "medical") return sourceType === "medical" || sourceName === "pubmed";
+  if (type === "news") return sourceMentionsNews(source);
+  return isPrimarySource(source);
+}
+
+function sourceMatchesDescriptor(required: RequiredSource, source: ScoredSource): boolean {
+  const haystack = sourceHaystack(source);
+  const aliasGroups = descriptorAliasGroups(required.description);
+  const aliasMatched = aliasGroups.length === 0 || aliasGroups.some((group) => group.some((alias) => normalizedIncludes(haystack, alias)));
+  if (!aliasMatched && !descriptorAllowsEquivalent(required.description)) return false;
+
+  const terms = descriptorTerms(required.description);
+  if (terms.length === 0) return aliasMatched || isPrimarySource(source);
+
+  const hits = terms.filter((term) => normalizedIncludes(haystack, term)).length;
+  const threshold = aliasGroups.length > 0 || descriptorAllowsEquivalent(required.description)
+    ? Math.min(2, terms.length)
+    : Math.min(3, Math.max(1, Math.ceil(terms.length * 0.5)));
+  return hits >= threshold;
+}
+
+function isPrimarySource(source: ScoredSource): boolean {
+  return (
+    source.provenance === "primary" ||
+    (source.source_type ? PRIMARY_SOURCE_TYPES.has(source.source_type) : false) ||
+    inSet(source.source_name, PRIMARY_SOURCE_NAMES)
+  );
+}
+
+function sourceMentionsNews(source: ScoredSource): boolean {
+  const haystack = sourceHaystack(source);
+  return ["news", "reuters", "bloomberg", "apnews", "associated press", "nyt", "wsj", "wall street journal"].some((term) =>
+    normalizedIncludes(haystack, term)
+  );
+}
+
+function descriptorAllowsEquivalent(description: string): boolean {
+  return /\b(equivalent|mainstream|or)\b/i.test(description);
+}
+
+function descriptorAliasGroups(description: string): string[][] {
+  const normalizedDescription = normalize(description);
+  return DESCRIPTOR_ALIAS_GROUPS
+    .filter((group) => group.some((alias) => normalizedIncludes(normalizedDescription, normalize(alias))))
+    .map((group) => group.map(normalize));
+}
+
+function descriptorTerms(description: string): string[] {
+  const aliasTokens = new Set(descriptorAliasGroups(description).flatMap((group) => group.flatMap((alias) => alias.split(" "))));
+  return meaningfulTokens(description).filter((term) => !aliasTokens.has(term) && !DESCRIPTOR_STOPWORDS.has(term));
+}
+
+function sourceHaystack(source: ScoredSource): string {
+  return normalize([source.source_name, source.source_type, source.provenance, source.title, source.url].filter(Boolean).join(" "));
+}
+
+function sourceKey(source: ScoredSource): string {
+  return normalize(source.url || `${source.source_name ?? "unknown"} ${source.title ?? ""}`);
+}
+
+function inSet(value: string | undefined, set: Set<string>): boolean {
+  return Boolean(value && set.has(value));
 }
 
 function inferUnsourcedClaims(answer: string, sources: ScoredSource[]): string[] {
@@ -121,5 +278,53 @@ function inferUnsourcedClaims(answer: string, sources: ScoredSource[]): string[]
 }
 
 function normalize(text: string): string {
-  return text.toLowerCase().replace(/\s+/g, " ").trim();
+  return text
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[_-]+/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizedIncludes(haystack: string, needle: string): boolean {
+  const normalizedNeedle = normalize(needle);
+  if (!normalizedNeedle) return false;
+  if (normalizedNeedle.includes(" ")) return haystack.includes(normalizedNeedle);
+  return new RegExp(`(?:^| )${escapeRegExp(normalizedNeedle)}(?: |$)`).test(haystack);
+}
+
+function meaningfulTokens(text: string): string[] {
+  const stopwords = new Set([
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "in",
+    "is",
+    "it",
+    "of",
+    "on",
+    "or",
+    "that",
+    "the",
+    "to",
+    "was",
+    "were",
+    "with"
+  ]);
+  return normalize(text)
+    .split(" ")
+    .filter((token) => token.length > 2 && !stopwords.has(token));
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

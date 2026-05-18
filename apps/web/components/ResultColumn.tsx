@@ -127,7 +127,7 @@ function ResultMetricsSection({ result }: { result: CompareResult }) {
     evaluation && evaluation.facts_total > 0
       ? `${evaluation.facts_hit}/${evaluation.facts_total}`
       : "Unavailable";
-  const sourceQuality =
+  const requiredSources =
     evaluation && evaluation.required_source_types_total > 0
       ? `${evaluation.required_source_types_hit}/${evaluation.required_source_types_total} required types`
       : evaluation?.score_status === "scored"
@@ -141,7 +141,7 @@ function ResultMetricsSection({ result }: { result: CompareResult }) {
           ? "warn"
           : "danger"
       : "muted";
-  const sourceQualityTone =
+  const requiredSourcesTone =
     evaluation && evaluation.score_status === "scored"
       ? evaluation.required_source_types_total > 0 && evaluation.required_source_types_hit < evaluation.required_source_types_total
         ? "warn"
@@ -174,7 +174,7 @@ function ResultMetricsSection({ result }: { result: CompareResult }) {
           ) : (
             <>
               <Metric label="Facts hit" value={factsValue} tone={factsTone} />
-              <Metric label="Source quality" value={sourceQuality} tone={sourceQualityTone} />
+              <Metric label="Required sources" value={requiredSources} tone={requiredSourcesTone} />
             </>
           )}
         </div>

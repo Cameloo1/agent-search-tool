@@ -9,7 +9,7 @@ import { hackerNewsHandler } from "./hackerNews.js";
 import { openAlexHandler } from "./openAlex.js";
 import { officialDocsHandler } from "./officialDocs.js";
 import { pubmedHandler } from "./pubmed.js";
-import { secEdgarHandler, secEftsSearchUrl } from "./secEdgar.js";
+import { compactSecSearchQuery, secEdgarHandler, secEftsSearchUrl } from "./secEdgar.js";
 import { semanticScholarHandler } from "./semanticScholar.js";
 import { stackExchangeHandler } from "./stackExchange.js";
 import { wikidataHandler } from "./wikidata.js";
@@ -305,6 +305,51 @@ describe("source handlers", () => {
         "https://www.sec.gov/Archives/edgar/data/1935172/000121390023033683/f20f2022ex4-19_xiaoicorp.htm"
       );
       expect(result.items[0]?.metadata.file_number).toBe("001-41631");
+    }
+  });
+
+  it("keeps inference-capex SEC searches on the live EFTS search endpoint", async () => {
+    const fetchSpy = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        hits: {
+          hits: [
+            {
+              _id: "0000320193-25-000008:aapl-20241228.htm",
+              _source: {
+                ciks: ["0000320193"],
+                display_names: ["Apple Inc.  (AAPL)  (CIK 0000320193)"],
+                form: "10-Q",
+                adsh: "0000320193-25-000008",
+                file_date: "2025-01-31",
+                file_description: "10-Q filing"
+              }
+            }
+          ]
+        }
+      })
+    }));
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const subQuery =
+      "publicly traded AI infrastructure companies latest 10-K or 10-Q filing disclosures capital expenditure increases inference compute site:sec_edgar";
+    const result = await secEdgarHandler.fetch(
+      { ...baseSubQuery, sub_query: subQuery, target_sources: ["sec_edgar"] },
+      { ...options, secUserAgent: "AgentSearchTool/0.1 contact@example.com" }
+    );
+
+    expect(result.ok).toBe(true);
+    const url = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(url.origin).toBe("https://efts.sec.gov");
+    expect(url.pathname).toBe("/LATEST/search-index");
+    expect(url.searchParams.get("q")).toBe(compactSecSearchQuery(subQuery));
+    expect(url.searchParams.get("q")).toBe("AI inference compute capital expenditure infrastructure 10-K 10-Q");
+    expect(url.searchParams.get("q")).not.toContain("site:sec_edgar");
+    expect(url.searchParams.get("q")).not.toContain("publicly");
+    expect(url.pathname).not.toContain("companyfacts");
+    if (result.ok) {
+      expect(result.items[0]?.source).toBe("sec_edgar");
+      expect(result.items[0]?.source_type).toBe("filing");
     }
   });
 
